@@ -49,6 +49,7 @@ git -C ~/Downloads clone https://github.com/OpenHamradioFirmware/G90Tools.git
 
 #build BBFW STM32 Loader from repo (specifically requires jdk1.19 & gradle8.1.1)
 if [ ! -f $GHIDRA_INSTALL_DIR/ghidra_*_STM32Loader.zip ]; then
+        #Manual installation ('sudo dpkg -i filename.deb') possible from here: http://us.archive.ubuntu.com/ubuntu/pool/universe/o/openjdk-19/
         sudo apt-get install -y openjdk-19-jdk # install JDK 19 and set it to default jdk
         sudo update-java-alternatives --jre-headless -s java-1.19*
         if [ ! -f /opt/gradle-8.1.1/bin/gradle ]; then
@@ -60,15 +61,17 @@ if [ ! -f $GHIDRA_INSTALL_DIR/ghidra_*_STM32Loader.zip ]; then
                 ### done installing gradle8.1.1 ###
         fi
         cd ~/Downloads/BBFW/ghidra-stm32/extensions/STM32Loader
+        export PATH=/opt/gradle-8.1.1/bin:$PATH
         gradle
+        7z x dist/ghidra_*_STM32Loader.zip -o"$GHIDRA_INSTALL_DIR/Ghidra/Extensions/."
         sudo mv dist/ghidra_*_STM32Loader.zip $GHIDRA_INSTALL_DIR/.
 fi
 
 #build STM32F427_437xx.gdt from repo
-if [ ! -f $GHIDRA_INSTALL_DIR/STM32F427_437xx.gdt ]; then
+if [ ! -f $GHIDRA_INSTALL_DIR/Ghidra/Features/Base/data/typeinfo/STM32F427_437xx.gdt ]; then
         wget -P ~/Downloads https://web.archive.org/web/20230622050333/https://www.st.com/content/ccc/resource/technical/software/firmware/group1/42/1a/98/f3/14/b4/4b/81/stsw-stm32065_v1-9-0/files/stsw-stm32065_v1-9-0.zip/jcr:content/translations/en.stsw-stm32065_v1-9-0.zip || wget -P ~/Downloads https://web.archive.org/web/20230622050333/https://www.st.com/content/ccc/resource/technical/software/firmware/group1/42/1a/98/f3/14/b4/4b/81/stsw-stm32065_v1-9-0/files/stsw-stm32065_v1-9-0.zip/jcr:content/translations/en.stsw-stm32065_v1-9-0.zip # download official standard peripheral library
         sudo unzip -d /opt/ ~/Downloads/en.stsw-stm32065_v1-9-0.zip
-        sudo $GHIDRA_INSTALL_DIR/support/analyzeHeadless /tmp tempproj -preScript ~/Downloads/BBFW/ghidra-stm32/scripts/CreateSTM32GDTArchive.py output_dir=$GHIDRA_INSTALL_DIR -deleteProject
+        sudo $GHIDRA_INSTALL_DIR/support/analyzeHeadless /tmp tempproj -preScript ~/Downloads/BBFW/ghidra-stm32/scripts/CreateSTM32GDTArchive.py output_dir=$GHIDRA_INSTALL_DIR/Ghidra/Features/Base/data/typeinfo -deleteProject
 fi
 
 #download and decrypt X6100_BBFW_V1.1.6_221112001.xgf proper
